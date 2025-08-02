@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use std::{ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign}};
 const IMAGE_WIDTH: usize = 400;
 const ASPECT_RATIO: f32 = 16.0 /9.0;
 const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f32 / ASPECT_RATIO) as usize;
@@ -43,7 +43,17 @@ fn main() {
     //End Render
 }
 
-#[derive(Copy, Debug, Default, Clone, PartialEq)]
+fn hit_sphere(center: &Point3, radius: f32, ray: &Ray ) -> bool {
+    let oc = *center - ray.origin;
+    let a = ray.direction.dot(ray.direction);
+    let b = -2.0 * ray.direction.dot(oc);
+    let c = oc.dot(oc) - (radius * radius);
+    let discriminant = b.powi(2) - 4.0 * a * c;
+    discriminant >= 0.
+
+}
+
+#[derive(Copy, Debug, Default, Clone, PartialEq) ]
 struct Vec3 {
     x: f32,
     y: f32,
@@ -65,6 +75,11 @@ impl Ray {
         self.origin + t * self.direction
     }
     fn color(self) -> Color {
+        if hit_sphere(&Vec3::new(0.,0.,-1.), 0.5, &self) {
+            return Color::new(1.,0.,0.)
+        }
+
+        // Sky Box
         let unit_direction = self.direction.unit_vector();
         let a = 0.5*(unit_direction.y + 1.0);
         (1.0-a)*Color::new(1.,1.,1.) + a*Color::new(0.5,0.7,1.0)
