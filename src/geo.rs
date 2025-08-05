@@ -5,7 +5,7 @@ use std::{
 };
 
 pub fn degrees_to_radians(degrees: f32) -> f32 {
-    degrees * (f32::consts::PI * 180.0)
+    degrees * (f32::consts::PI / 180.0)
 }
 
 pub fn hit_sphere(center: &Point3, radius: f32, ray: &Ray) -> f32 {
@@ -324,3 +324,17 @@ impl Hittable for HittableList {
         hit_anything
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn degrees_are_converted_to_radians() {
+        let pi = f32::consts::PI;
+        assert!((degrees_to_radians(0.0) - 0.0).abs() < 1e-6);
+        assert!((degrees_to_radians(90.0) - pi / 2.0).abs() < 1e-6);
+        assert!((degrees_to_radians(180.0) - pi).abs() < 1e-6);
+        assert!((degrees_to_radians(360.0) - 2.0 * pi).abs() < 1e-6);
+    }
+}
+
