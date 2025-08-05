@@ -1,6 +1,11 @@
+use core::f32;
 use std::{
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign}, rc::Rc
 };
+
+pub fn degrees_to_radians(degrees: f32) -> f32 {
+    degrees * (f32::consts::PI * 180.0)
+}
 
 pub fn hit_sphere(center: &Point3, radius: f32, ray: &Ray) -> f32 {
     let oc = *center - ray.origin;
@@ -36,13 +41,17 @@ impl Ray {
     fn at(&self, t: f32) -> Point3 {
         self.origin + t * self.direction
     }
-    pub fn color(self) -> Color {
-        let t = hit_sphere(&Vec3::new(0., 0., -1.), 0.5, &self);
+    pub fn color(self, world: &dyn Hittable) -> Color {
+        //let t = hit_sphere(&Vec3::new(0., 0., -1.), 0.5, &self);
+        let mut hit_record = HitRecord::default();
 
-        if t > 0. {
-            let n = (self.at(t) - Vec3::new(0., 0., -1.)).unit_vector();
-            return 0.5 * Color::new(n.x + 1., n.y + 1., n.z + 1.);
+        if world.hit(&self, 0., f32::INFINITY, &mut hit_record) {
+            return 0.5 * (hit_record.normal + Color::new(1.,1.,1.));
         }
+        //if t > 0. {
+            //let n = (self.at(t) - Vec3::new(0., 0., -1.)).unit_vector();
+            //return 0.5 * Color::new(n.x + 1., n.y + 1., n.z + 1.);
+        //}
 
         // Sky Box
         let unit_direction = self.direction.unit_vector();
@@ -78,6 +87,7 @@ impl Vec3 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
 
+    #[allow(dead_code)]
     fn cross(&self, rhs: Self) -> Self {
         Vec3 {
             x: self.y * rhs.z - self.z * self.y,
@@ -219,24 +229,36 @@ impl std::fmt::Display for Vec3 {
     }
 }
 
-#[derive(Copy, Clone)]
-struct HitRecord {
-    p: Point3,
+#[derive(Copy, Clone, Default)]
+pub struct HitRecord {
+    point: Point3,
     normal: Vec3,
     t: f32,
+    front_face: bool,
 }
 
-trait Hittable {
+impl HitRecord {
+    fn set_face_normal(&mut self, ray: &Ray, outward_normal: &Vec3) {
+        self.front_face = ray.direction.dot(*outward_normal) < 0.;
+        self.normal = if self.front_face {
+            *outward_normal
+        } else {
+            -(*outward_normal)
+        }
+    }
+}
+
+pub trait Hittable {
     fn hit(&self, ray: &Ray, ray_tmin: f32, ray_tmax: f32, hit_record: &mut HitRecord) -> bool;
 }
 
-struct Sphere {
+pub struct Sphere {
     center: Point3,
     radius: f32,
 }
 
 impl Sphere {
-    fn new(center: Point3, radius: f32) -> Self {
+    pub fn new(center: Point3, radius: f32) -> Self {
         Self { center, radius }
     }
 }
@@ -262,9 +284,43 @@ impl Hittable for Sphere {
                 return false;
             }
             hit_record.t = root;
-            hit_record.p = ray.at(hit_record.t);
-            hit_record.normal = (hit_record.p - self.center) / self.radius;
+            hit_record.point = ray.at(hit_record.t);
+            let outward_normal = (hit_record.point - self.center) / self.radius;
+            hit_record.set_face_normal(&ray, &outward_normal);
         }
             true
     }
 }
+
+#[derive(Default)]
+pub struct HittableList {
+    objects: Vec<Rc<dyn Hittable>>,
+}
+
+impl HittableList {
+    pub fn add(&mut self, object: Rc<dyn Hittable>){
+        self.objects.push(object);
+    }
+    pub fn clear(&mut self){
+        self.objects.clear();
+    }
+}
+
+impl Hittable for HittableList {
+    
+    fn hit(&self, ray: &Ray, ray_tmin: f32, ray_tmax: f32, hit_record: &mut HitRecord) -> bool {
+        let mut temp_hr = HitRecord::default();
+        let mut hit_anything = false;
+        let mut closest_so_far = ray_tmax;
+
+        for object in &self.objects {
+            if object.hit(ray, ray_tmin, closest_so_far, &mut temp_hr){
+                hit_anything = true;
+                closest_so_far = temp_hr.t;
+                *hit_record = temp_hr;
+            }
+        }
+        hit_anything
+    }
+}
+

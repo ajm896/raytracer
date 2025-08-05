@@ -1,4 +1,5 @@
 use crate::geo::*;
+use std::rc::Rc;
 const IMAGE_WIDTH: usize = 400;
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f32 / ASPECT_RATIO) as usize;
@@ -23,6 +24,13 @@ fn main() {
         camera_center - Vec3::new(0.0, 0.0, focal_length) - viewport_u / 2. - viewport_v / 2.;
     let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
+    let mut world = HittableList::default();
+    let ball = Rc::new(Sphere::new(Vec3::new(0.,0.,-1.), 0.5));
+    let ground = Rc::new(Sphere::new(Vec3::new(0.,-100.5,-1.), 100.));
+
+    world.add(ball.clone());
+    world.add(ground.clone());
+
     // Render
     println!("P3");
     println!("{IMAGE_WIDTH} {IMAGE_HEIGHT}");
@@ -35,7 +43,7 @@ fn main() {
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction);
 
-            let pixel_color = ray.color();
+            let pixel_color = ray.color(&world);
             pixel_color.write_color();
         }
     }
