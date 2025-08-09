@@ -71,9 +71,9 @@ impl Ray {
 
 impl Color {
     pub fn write_color(&self) {
-        let red_out: i32 = (self.x * 255.0) as i32;
-        let green_out: i32 = (self.y * 255.0) as i32;
-        let blue_out: i32 = (self.z * 255.0) as i32;
+        let red_out: i32 =      (self.x.clamp(0, 0.9999) * 255.0) as i32;
+        let green_out: i32 =    (self.y.clamp(0, 0.9999) * 255.0) as i32;
+        let blue_out: i32 =     (self.z.clamp(0, 0.9999) * 255.0) as i32;
         println!("{red_out} {green_out} {blue_out}");
     }
 }
