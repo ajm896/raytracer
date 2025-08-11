@@ -1,14 +1,11 @@
+use crate::vec3::{Point3, Ray, Vec3};
 use core::f32;
-use crate::vec3::{Vec3, Ray, Point3};
-use std::{
-    rc::Rc,
-};
+use std::rc::Rc;
 pub mod vec3;
 
 pub fn degrees_to_radians(degrees: f32) -> f32 {
     degrees * (f32::consts::PI / 180.0)
 }
-
 
 #[derive(Copy, Clone, Default)]
 pub struct HitRecord {

@@ -1,5 +1,5 @@
 use crate::geo::*;
-use crate::vec3::{Point3, Vec3, Ray};
+use crate::vec3::{Point3, Ray, Vec3};
 const IMAGE_WIDTH: usize = 1080;
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f32 / ASPECT_RATIO) as usize;

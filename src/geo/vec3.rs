@@ -1,5 +1,5 @@
+use crate::geo::{HitRecord, Hittable};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
-use crate::geo::{Hittable, HitRecord};
 
 #[derive(Copy, Debug, Default, Clone, PartialEq)]
 pub struct Vec3 {
@@ -45,7 +45,6 @@ impl Vec3 {
     }
 }
 
-
 impl Ray {
     pub fn new(origin: Point3, direction: Vec3) -> Self {
         Ray { origin, direction }
@@ -71,14 +70,12 @@ impl Ray {
 
 impl Color {
     pub fn write_color(&self) {
-        let red_out: i32 =      (self.x.clamp(0., 0.9999) * 255.0) as i32;
-        let green_out: i32 =    (self.y.clamp(0., 0.9999) * 255.0) as i32;
-        let blue_out: i32 =     (self.z.clamp(0., 0.9999) * 255.0) as i32;
+        let red_out: i32 = (self.x.clamp(0., 0.9999) * 255.0) as i32;
+        let green_out: i32 = (self.y.clamp(0., 0.9999) * 255.0) as i32;
+        let blue_out: i32 = (self.z.clamp(0., 0.9999) * 255.0) as i32;
         println!("{red_out} {green_out} {blue_out}");
     }
 }
-
-
 
 impl Add for Vec3 {
     type Output = Self;
