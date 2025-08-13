@@ -210,6 +210,10 @@ impl std::fmt::Display for Vec3 {
 
 impl Distribution<Vec3> for StandardUniform {
     fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Vec3 {
-        Vec3::new(rng.random_range(0.0..1.0), rng.random_range(0.0..1.0), rng.random_range(0.0..1.0))
+        Vec3::new(
+            rng.random_range(0.0..1.0),
+            rng.random_range(0.0..1.0),
+            rng.random_range(0.0..1.0),
+        )
     }
 }
